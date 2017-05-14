@@ -13,8 +13,8 @@ parser = None
 searcher = None
 
 
-@cache.cached(timeout=0)
 @app.route("/conditions", methods=["GET"])
+@cache.cached(key_prefix=lambda: request.full_path, timeout=0)
 def conditions():
     query = " ".join(re.findall("\w+", request.args.get("query", "")))
     query = parser.parse(query)
@@ -37,6 +37,5 @@ def before_first_request():
     parser = QueryParser("text", schema=index.schema, group=og)
     searcher = index.searcher()
 
-    cache.init_app(app)
     app.logger.addHandler(logging.StreamHandler(sys.stdout))
     app.logger.setLevel(logging.INFO)
